@@ -16,8 +16,8 @@ public class APRILTagDetection extends LinearOpMode {
 
     // --- TUNING CONSTANTS ---
     // You must tune these values for your specific camera and setup
-    private static final double FOCAL_LENGTH = 700; // Example: 700 pixels
-    private static final double TAG_SIZE_INCHES = 2.0; // The actual physical size of the AprilTag (e.g., 2 inches)
+    private static final double FOCAL_LENGTH = 279; // Example: 700 pixels
+    private static final double TAG_SIZE_INCHES = 6; // The actual physical size of the AprilTag (e.g., 2 inches)
 
     @Override
     public void runOpMode() throws InterruptedException {

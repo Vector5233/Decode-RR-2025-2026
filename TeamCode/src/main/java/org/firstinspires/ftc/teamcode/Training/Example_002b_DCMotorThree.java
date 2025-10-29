@@ -12,9 +12,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
  * Motor port 01: motorTwo
  * Motor port 02: motorThree
  */
-
-@TeleOp(group = "Primary", name = "DC Motor Run to position")
 @Disabled
+@TeleOp(group = "Primary", name = "DC Motor Run to position")
+
 
 public class Example_002b_DCMotorThree extends LinearOpMode {
     //Global Variables

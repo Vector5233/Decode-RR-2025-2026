@@ -13,8 +13,8 @@ public class HuskyLensAprilTagDashboard extends LinearOpMode {
 
     private HuskyLens huskyLens;
     private final int READ_PERIOD = 1; // seconds
-    private static final double FOCAL_LENGTH = 700; // pixels (tune for your setup)
-    private static final double TAG_SIZE_INCHES = 2.0; // real tag size in inches
+    private static final double FOCAL_LENGTH = 281; // pixels (tune for your setup)
+    private static final double TAG_SIZE_INCHES = 6.5; // real tag size in inches
 
     private FtcDashboard dashboard;
 
