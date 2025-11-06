@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @Disabled
 @TeleOp(group = "Primary", name = "Servo with buttons")
-public class Example_001c_ServoOne extends LinearOpMode {
+public class   Example_001c_ServoOne extends LinearOpMode {
 
     //global variables go below the class name
     private Servo servoOne; // servos go from 0 to 1 rotates 180 degrees
