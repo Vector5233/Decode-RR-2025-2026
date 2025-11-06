@@ -2,21 +2,25 @@ package org.firstinspires.ftc.teamcode.DriverControl;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo; // **FIXED: Import CRServo for continuous rotation**
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo; // Import the Servo class
+// import com.qualcomm.robotcore.hardware.Servo; // Not needed for CRServos
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp (group = "DriverControl", name = "Teleop")
 public class TELEOPV1 extends LinearOpMode {
 
     private DcMotorEx flywheelMotor;
+    // TODO: Find and set the correct ticks per revolution for your motor
+    // Common values are 28, 145.1, 384.5, 537.7 for different FTC motors
     private final double TICKS_PER_REV = 28; // Example for a
 
     // Declare Continuous Servo variables
-    private Servo continuousServo1;
-    private Servo continuousServo2;
+    // **FIXED: Changed type from Servo to CRServo**
+    private CRServo continuousServo1;
+    private CRServo continuousServo2;
 
     private double targetFlywheelPower = 0.0;
     private double currentFlywheelPower = 0.0;
@@ -30,6 +34,7 @@ public class TELEOPV1 extends LinearOpMode {
         initHardware();
         while (!isStarted()){
             // You can place initialization telemetry here
+            telemetry.update(); // Add update to see init messages
         }
         waitForStart();
         while (opModeIsActive()){
@@ -56,16 +61,21 @@ public class TELEOPV1 extends LinearOpMode {
                 flywheelMotor.setPower(currentFlywheelPower);
             }
 
-            // --- Continuous Servo Logic ---
+            // --- Continuous Servo Logic (e.g., Intake) ---
             if (gamepad1.a) {
-                // When 'A' is pressed, run servos at full power
+                // When 'A' is pressed, run servos forward (e.g., intake)
                 if(continuousServo1 != null) continuousServo1.setPower(1.0);
                 if(continuousServo2 != null) continuousServo2.setPower(1.0);
+            } else if (gamepad1.b) {
+                // **Added: Use 'B' to reverse the servos (e.g., outtake/reverse)**
+                if(continuousServo1 != null) continuousServo1.setPower(-1.0);
+                if(continuousServo2 != null) continuousServo2.setPower(-1.0);
             } else {
-                // When 'A' is not pressed, stop the servos
-                // For continuous rotation servos, 0.5 is the standard stop value.
-                if(continuousServo1 != null) continuousServo1.setPower(0.5);
-                if(continuousServo2 != null) continuousServo2.setPower(0.5);
+                // When neither is pressed, stop the servos.
+                // For continuous rotation servos, a power of 0.0 (or setPower(0)) is stop.
+                // 0.5 is the stop value for a standard Servo *command* to a CRServo, but setPower(0.0) is clearer and standard.
+                if(continuousServo1 != null) continuousServo1.setPower(0.0); // **FIXED: Changed stop power to 0.0**
+                if(continuousServo2 != null) continuousServo2.setPower(0.0); // **FIXED: Changed stop power to 0.0**
             }
 
             // Call the telemetry update method
@@ -92,12 +102,16 @@ public class TELEOPV1 extends LinearOpMode {
     // New method to initialize the continuous servos
     public void initContinuousServos() {
         try {
-            continuousServo1 = hardwareMap.get(Servo.class, "LF");
-            continuousServo2 = hardwareMap.get(Servo.class, "RF");
+            // **FIXED: Changed hardware map type to CRServo.class**
+            // **NOTE: Assuming "intake1" and "intake2" are the correct hardware map names.**
+            // If the hardware map names "LFlywheel" and "RFlywheel" were correct, use those instead.
+            continuousServo1 = hardwareMap.get(CRServo.class, "intake1");
+            continuousServo2 = hardwareMap.get(CRServo.class, "intake2");
+            // NOTE: You can set the direction of a CRServo if needed, e.g., continuousServo2.setDirection(DcMotorSimple.Direction.REVERSE);
         } catch (Exception e) {
             continuousServo1 = null;
             continuousServo2 = null;
-            telemetry.addData("Error", "One or both servos not found");
+            telemetry.addData("Error", "One or both continuous rotation servos not found");
         }
     }
 
@@ -114,10 +128,11 @@ public class TELEOPV1 extends LinearOpMode {
 
         // Servo Telemetry
         if (continuousServo1 != null && continuousServo2 != null) {
-            telemetry.addData("Servo 1 Power", "%.2f", continuousServo1.getPower());
-            telemetry.addData("Servo 2 Power", "%.2f", continuousServo2.getPower());
+            // CRServo uses .getPower() just like DcMotors/DcMotorEx
+            telemetry.addData("Intake 1 Power", "%.2f", continuousServo1.getPower());
+            telemetry.addData("Intake 2 Power", "%.2f", continuousServo2.getPower());
         } else {
-            telemetry.addData("Servo Status", "Not Initialized");
+            telemetry.addData("Intake Status", "Not Initialized");
         }
         telemetry.update();
     }
