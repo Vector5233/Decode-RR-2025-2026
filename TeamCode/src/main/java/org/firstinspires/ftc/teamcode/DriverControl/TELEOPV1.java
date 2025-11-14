@@ -2,17 +2,16 @@ package org.firstinspires.ftc.teamcode.DriverControl;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo; // **FIXED: Import CRServo for continuous rotation**
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-// import com.qualcomm.robotcore.hardware.Servo; // Not needed for CRServos
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp (group = "DriverControl", name = "Teleop")
 public class TELEOPV1 extends LinearOpMode {
 
     private DcMotorEx flywheelMotor;
+    private DcMotorEx flywheelMotor2; // **ADDED: Second motor for the flywheel**
     // TODO: Find and set the correct ticks per revolution for your motor
     // Common values are 28, 145.1, 384.5, 537.7 for different FTC motors
     private final double TICKS_PER_REV = 28; // Example for a
@@ -60,6 +59,9 @@ public class TELEOPV1 extends LinearOpMode {
             if (flywheelMotor != null) {
                 flywheelMotor.setPower(currentFlywheelPower);
             }
+            if (flywheelMotor2 != null) {
+                flywheelMotor2.setPower(currentFlywheelPower); // Use the same power variable
+            }
 
             // --- Continuous Servo Logic (e.g., Intake) ---
             if (gamepad1.a) {
@@ -97,6 +99,16 @@ public class TELEOPV1 extends LinearOpMode {
             flywheelMotor = null;
             telemetry.addData("Error", "Flywheel motor not found");
         }
+        // --- ADD THIS BLOCK for the second motor ---
+        try {
+            flywheelMotor2 = hardwareMap.get(DcMotorEx.class, "flywheelMotor2");
+            // IMPORTANT: The second motor often needs to be the opposite direction
+            flywheelMotor2.setDirection(DcMotorSimple.Direction.FORWARD);
+            flywheelMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        } catch (Exception e) {
+            flywheelMotor2 = null;
+            telemetry.addData("Error", "Flywheel motor 2 (flywheelMotor2) not found");
+        }
     }
 
     // New method to initialize the continuous servos
@@ -124,6 +136,14 @@ public class TELEOPV1 extends LinearOpMode {
             telemetry.addData("Flywheel RPM", "%.2f", rpm);
         } else {
             telemetry.addData("Flywheel Status", "Not Initialized");
+        }
+        if (flywheelMotor2 != null) {
+            double ticksPerSecond2 = flywheelMotor2.getVelocity();
+            double rpm2 = (ticksPerSecond2 / TICKS_PER_REV) * 60;
+            telemetry.addData("Flywheel 2 Power", "%.2f", currentFlywheelPower);
+            telemetry.addData("Flywheel 2 RPM", "%.2f", rpm2);
+        } else {
+            telemetry.addData("Flywheel 2 Status", "Not Initialized");
         }
 
         // Servo Telemetry
