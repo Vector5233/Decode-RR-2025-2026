@@ -198,11 +198,14 @@ public class TELEOPV2 extends LinearOpMode {
         }
     }
     public void collector(){
-        if(gamepad1.right_trigger >= 0){
+        if(gamepad1.right_trigger >= 0.25){
             if (collector != null) collector.setPower(1.0);
         }
-        else if(gamepad1.left_trigger >= 0){
+        else if(gamepad1.left_trigger >= 0.25){
             if (collector != null) collector.setPower(-1.0);
+        }
+        else{
+            if (collector!=null) collector.setPower(0.0);
         }
     }
     public void telemetryData(){

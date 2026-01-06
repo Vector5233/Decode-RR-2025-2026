@@ -28,7 +28,8 @@ public class FlyWheelEncoderTest extends LinearOpMode {
 
         } catch (Exception e) {
             flywheelMotor = null;
-            telemetry.addData("Status", "Error: Flywheel motor not found!");
+            telemetry.addData("Status", "Error: Flywheel motor " +
+                    ".  or not found!");
         }
         telemetry.update();
 
