@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.DriverControl;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -22,15 +21,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
  * flpperOne
  * flipperTwo
  */
-@Disabled
-@TeleOp(group = "Primary", name = "Basic TeleOp Structure")
+
+@TeleOp(group = "Primary", name = "Pick This One")
 public class TELEOPV2 extends LinearOpMode {
     //declare motors
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
-    private DcMotorEx flywheelMotor;
+    private DcMotorEx flywheel;
     private DcMotorEx flywheelMotor2; // **ADDED: Second motor for the flywheel**
     // TODO: Find and set the correct ticks per revolution for motor
     // Common values are 28, 145.1, 384.5, 537.7 for different FTC motors
@@ -46,7 +45,6 @@ public class TELEOPV2 extends LinearOpMode {
 
 
     //collector and shooter motors can be declared here when needed
-    private DcMotor flyWheel;
     private DcMotor collector;
 
     @Override
@@ -66,6 +64,7 @@ public class TELEOPV2 extends LinearOpMode {
             driveTrain();
             flywheels();
             telemetryData();
+            collector();
         }
     }
 
@@ -73,7 +72,7 @@ public class TELEOPV2 extends LinearOpMode {
         initDriveTrain();
         initFlywheelMotor();
         initContinuousServos();
-
+        initCollector();
     }
 
     public void initDriveTrain() {
@@ -98,7 +97,6 @@ public class TELEOPV2 extends LinearOpMode {
         //mechanum drive code here for controls
         double modifier = gamepad1.x ? 0.5 : 1.0;
 
-
         double drive = -gamepad1.left_stick_y;  // Forward/backward (negated)
         double strafe = gamepad1.left_stick_x;  // Left/right
         double turn = gamepad1.right_stick_x; // Rotation
@@ -117,8 +115,7 @@ public class TELEOPV2 extends LinearOpMode {
                 max = Math.abs(p);
             }
         }
-
-        // Divide all by the max to stay within -1 to 1
+                // Divide all by the max to stay within -1 to 1
         frontLeft.setPower(frontLeftPower / max * modifier);
         backLeft.setPower(backLeftPower / max * modifier);
         frontRight.setPower(frontRightPower / max * modifier);
@@ -136,7 +133,6 @@ public class TELEOPV2 extends LinearOpMode {
             }
         }
         lastRightBumper = currRightBumper;
-
         if (Math.abs(currentFlywheelPower - targetFlywheelPower) > FLYWHEEL_RAMP) {
             if (currentFlywheelPower < targetFlywheelPower)
                 currentFlywheelPower += FLYWHEEL_RAMP;
@@ -144,11 +140,9 @@ public class TELEOPV2 extends LinearOpMode {
         } else {
             currentFlywheelPower = targetFlywheelPower;
         }
-
-        if (flywheelMotor != null) {
-            flywheelMotor.setPower(currentFlywheelPower);
+        if (flywheel != null) {
+            flywheel.setPower(currentFlywheelPower);
         }
-        // --- Continuous Servo Logic (e.g., Intake) ---
         if (gamepad1.a) {
             // When 'A' is pressed, run servos forward (e.g., intake)
             if (continuousServo1 != null) continuousServo1.setPower(1.0);
@@ -169,25 +163,25 @@ public class TELEOPV2 extends LinearOpMode {
     }
     public void initFlywheelMotor(){
         try {
-            flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheelMotor");
-            flywheelMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            flywheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+            flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+            flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         } catch (Exception e) {
-            flywheelMotor = null;
+            flywheel = null;
             telemetry.addData("Error", "Flywheel motor not found");
         }
         // --- ADD THIS BLOCK for the second motor ---
+    }
+    public void initCollector() {
         try {
-            flywheelMotor2 = hardwareMap.get(DcMotorEx.class, "flywheelMotor2");
-            // IMPORTANT: The second motor often needs to be the opposite direction
-            flywheelMotor2.setDirection(DcMotorSimple.Direction.FORWARD);
-            flywheelMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            collector = hardwareMap.get(DcMotorEx.class, "collector");
+            collector.setDirection(DcMotorSimple.Direction.FORWARD);
+            collector.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         } catch (Exception e) {
-            flywheelMotor2 = null;
-            telemetry.addData("Error", "Flywheel motor 2 (flywheelMotor2) not found");
+            collector = null;
+            telemetry.addData("Error", "collector (collector) not found");
         }
     }
-
     // New method to initialize the continuous servos
     public void initContinuousServos() {
         try {
@@ -203,11 +197,18 @@ public class TELEOPV2 extends LinearOpMode {
             telemetry.addData("Error", "One or both continuous rotation servos not found");
         }
     }
-
+    public void collector(){
+        if(gamepad1.right_trigger >= 0){
+            if (collector != null) collector.setPower(1.0);
+        }
+        else if(gamepad1.left_trigger >= 0){
+            if (collector != null) collector.setPower(-1.0);
+        }
+    }
     public void telemetryData(){
         // Flywheel Telemetry
-        if (flywheelMotor != null) {
-            double ticksPerSecond = flywheelMotor.getVelocity();
+        if (flywheel != null) {
+            double ticksPerSecond = flywheel.getVelocity();
             double rpm = (ticksPerSecond / TICKS_PER_REV) * 60;
             telemetry.addData("Flywheel Power", "%.2f", currentFlywheelPower);
             telemetry.addData("Flywheel RPM", "%.2f", rpm);
@@ -234,3 +235,5 @@ public class TELEOPV2 extends LinearOpMode {
         telemetry.update();
     }
 }
+      ////    ////////////////////     ////
+     ////    ////////////////////      ////
