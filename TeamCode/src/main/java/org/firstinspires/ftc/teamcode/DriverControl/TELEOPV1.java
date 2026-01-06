@@ -67,11 +67,11 @@ public class TELEOPV1 extends LinearOpMode {
             if (gamepad1.a) {
                 // When 'A' is pressed, run servos forward (e.g., intake)
                 if(continuousServo1 != null) continuousServo1.setPower(1.0);
-                if(continuousServo2 != null) continuousServo2.setPower(1.0);
+                if(continuousServo2 != null) continuousServo2.setPower(-1.0);
             } else if (gamepad1.b) {
                 // **Added: Use 'B' to reverse the servos (e.g., outtake/reverse)**
                 if(continuousServo1 != null) continuousServo1.setPower(-1.0);
-                if(continuousServo2 != null) continuousServo2.setPower(-1.0);
+                if(continuousServo2 != null) continuousServo2.setPower(1.0);
             } else {
                 // When neither is pressed, stop the servos.
                 // For continuous rotation servos, a power of 0.0 (or setPower(0)) is stop.
