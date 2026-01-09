@@ -1,15 +1,16 @@
 package org.firstinspires.ftc.teamcode.DriverControl;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(group = "Primary", name = "Field Centric - Final")
+@TeleOp(group = "Primary", name = "Final Robot Control")
 public class TELEOPV2 extends LinearOpMode {
 
     // --- SERVO POSITIONS ---
@@ -18,10 +19,14 @@ public class TELEOPV2 extends LinearOpMode {
     private final double SERVO_POS_CLOSED = 0.25;
 
     // --- Hardware ---
-    private DcMotor frontLeft, frontRight, backLeft, backRight;
+    // Drive Train
+    private DcMotorEx frontLeft, frontRight, backLeft, backRight;
+    // Mechanisms
     private DcMotorEx flywheel;
     private DcMotor collector;
+    private DcMotorEx leftLift, rightLift; // <--- NEW LIFT MOTORS
     private Servo servo1, servo2;
+    // Sensors
     private IMU imu;
 
     // --- State Variables ---
@@ -29,8 +34,10 @@ public class TELEOPV2 extends LinearOpMode {
     private double currentFlywheelPower = 0.0;
     private final double FLYWHEEL_RAMP = 0.02;
     private final double FLYWHEEL_ON_POWER = 1.00;
+
     private double collectorPower = 0.0;
 
+    // Toggles
     private boolean lastRB = false, lastLB = false, lastA = false;
 
     @Override
@@ -38,9 +45,10 @@ public class TELEOPV2 extends LinearOpMode {
         initHardware();
 
         while (!isStarted()) {
-            telemetry.addData("Status", "Field Centric Ready");
-            telemetry.addData("Note", "Point robot AWAY and press Start");
-            telemetry.addData("Reset Yaw", "Press Options/Back button");
+            telemetry.addData("Status", "Ready");
+            telemetry.addData("Lift", "Gamepad 2 Triggers");
+            telemetry.addData("Drive", "Field Centric");
+            telemetry.addData("You got this!","true");
             telemetry.update();
         }
 
@@ -48,6 +56,7 @@ public class TELEOPV2 extends LinearOpMode {
 
         while (opModeIsActive()) {
             driveTrainFieldCentric();
+            liftLogic(); // <--- NEW LIFT FUNCTION
             flywheels();
             servos();
             collector();
@@ -56,54 +65,75 @@ public class TELEOPV2 extends LinearOpMode {
     }
 
     public void initHardware() {
-        // Motors
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeftMotor");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRightMotor");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeftMotor");
-        backRight = hardwareMap.get(DcMotor.class, "backRightMotor");
+        // --- Drive Motors ---
+        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
+        frontRight = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
+        backLeft = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
+        backRight = hardwareMap.get(DcMotorEx.class, "backRightMotor");
+
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        // IMU Setup for Field Centric
-        imu = hardwareMap.get(IMU.class, "imu");
-        // ADJUST THESE based on how your hub is mounted:
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
-        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
-        imu.initialize(new IMU.Parameters(orientationOnRobot));
+        // --- Lift Motors ---
+        // We assume one needs to be reversed so they both move UP together.
+        // If they fight each other, change REVERSE to FORWARD here.
+        leftLift = hardwareMap.get(DcMotorEx.class, "leftLift");
+        rightLift = hardwareMap.get(DcMotorEx.class, "rightLift");
 
+        leftLift.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightLift.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        leftLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // --- Other Hardware ---
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         collector = hardwareMap.get(DcMotor.class, "collector");
 
         servo1 = hardwareMap.get(Servo.class, "servoOne");
         servo2 = hardwareMap.get(Servo.class, "servoTwo");
         servo2.setDirection(Servo.Direction.REVERSE);
+
+        // --- IMU Setup ---
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+        imu.initialize(new IMU.Parameters(orientation));
     }
 
+    // --- GAMEPAD 2: LIFT CONTROL ---
+    public void liftLogic() {
+        // Right Trigger = Up (Positive)
+        // Left Trigger = Down (Negative)
+        double liftPower = gamepad2.right_trigger - gamepad2.left_trigger;
+
+        leftLift.setPower(liftPower);
+        rightLift.setPower(liftPower);
+    }
+
+    // --- GAMEPAD 1: DRIVE & MECHANISMS ---
     public void driveTrainFieldCentric() {
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
 
-        // Joystick Deadzone
+        // Deadzones
         if (Math.abs(y) < 0.05) y = 0;
         if (Math.abs(x) < 0.05) x = 0;
         if (Math.abs(rx) < 0.05) rx = 0;
 
+        // Reset Yaw
         if (gamepad1.back) imu.resetYaw();
 
-        // 1. Get current heading
+        // Get Heading & Velocity
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double angularVel = imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
 
-        // 2. GET ANGULAR VELOCITY (The "Secret Sauce" for accuracy)
-        // This tells us how fast the robot is currently rotating
-        double angularVelocity = imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
+        // Predictive Heading (Lag Compensation)
+        double correctedHeading = botHeading + (angularVel * 0.15);
 
-        // 3. PREDICTIVE HEADING
-        // We add a small "look-ahead" based on velocity to compensate for loop lag
-        double correctedHeading = botHeading + (angularVelocity * 0.015); // Adjust 0.015 based on testing
-
-        // Field Centric Math using the corrected heading
+        // Field Centric Math
         double rotX = x * Math.cos(-correctedHeading) - y * Math.sin(-correctedHeading);
         double rotY = x * Math.sin(-correctedHeading) + y * Math.cos(-correctedHeading);
 
@@ -160,9 +190,10 @@ public class TELEOPV2 extends LinearOpMode {
     }
 
     public void telemetryData() {
-        telemetry.addData("Heading (Deg)", Math.toDegrees(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS)));
-        telemetry.addData("Flywheel", currentFlywheelPower);
-        telemetry.addData("Intake", collectorPower);
+        telemetry.addData("Lift Power", "%.2f", leftLift.getPower());
+        telemetry.addData("Odo Parallel", frontLeft.getCurrentPosition());
+        telemetry.addData("Odo Perp", frontRight.getCurrentPosition());
+        telemetry.addData("Heading", Math.toDegrees(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS)));
         telemetry.update();
     }
 }
