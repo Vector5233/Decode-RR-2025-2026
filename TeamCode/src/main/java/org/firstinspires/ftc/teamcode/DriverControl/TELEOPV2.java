@@ -97,8 +97,8 @@ public class TELEOPV2 extends LinearOpMode {
         // --- IMU Setup ---
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP);
         imu.initialize(new IMU.Parameters(orientation));
     }
 
