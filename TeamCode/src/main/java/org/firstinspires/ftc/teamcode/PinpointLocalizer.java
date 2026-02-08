@@ -35,6 +35,18 @@ public final class PinpointLocalizer implements Localizer {
 
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
         driver.setEncoderResolution(1.0 / inPerTick, DistanceUnit.INCH);
+        // TODO: add in the correct offset values here for the pods to the computer
+        //The Pinpoint computer needs to know where your tracking wheels are
+        // relative to the center of rotation of your robot
+        // (usually the physical center).•parYTicks (Parallel Offset):
+        // This is the distance from the center of the robot to the parallel
+        // (forward-facing) wheel along the Y-axis (left/right).
+        // •Positive if the wheel is on the left side.
+        // •Negative if the wheel is on the right side.
+        // •perpXTicks (Perpendicular Offset):
+        // This is the distance from the center of the robot to the perpendicular (strafe) wheel along the X-axis
+        // (forward/backward).•Positive if the wheel is in front of the center.
+        // •Negative if the wheel is behind the center.
         driver.setOffsets(inPerTick * PARAMS.parYTicks, inPerTick * PARAMS.perpXTicks, DistanceUnit.INCH);
 
         // TODO: reverse encoder directions if needed
