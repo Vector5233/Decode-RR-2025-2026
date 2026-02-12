@@ -9,14 +9,23 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  */
 
 @Disabled
-@TeleOp(group = "Primary", name = "Short Name")
+@TeleOp(group = "DriverControlled", name = "Basic TeleOp Structure")
 public class Example_001a_BasicTeleOpStructure extends LinearOpMode {
     @Override
     public void  runOpMode() throws InterruptedException{
+        // Call to method to initialize hardware
         initHardware();
-        while(!isStarted()){}
+        // Wait for the start button to be pressed
+        // Loop to provide telemetry before start
+        while(!isStarted()){
+            // Telemetry goes here
+        }
         waitForStart();
-        while(opModeIsActive()){}
+        while(opModeIsActive()){
+            // TeleOp controls and telemetry go here
+        }
     }
-    public void initHardware(){}
+    public void initHardware(){
+        // Initialize hardware pieces here
+    }
 }
