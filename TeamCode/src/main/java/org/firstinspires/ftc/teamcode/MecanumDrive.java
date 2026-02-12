@@ -50,6 +50,7 @@ import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public final class MecanumDrive {
@@ -252,6 +253,16 @@ public final class MecanumDrive {
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
     }
 
+    // Public helper: forward an OpMode Telemetry object to the localizer if supported
+    @SuppressWarnings("unused")
+    public void addLocalizerTelemetry(Telemetry telemetry) {
+        if (localizer instanceof PinpointLocalizer) {
+            ((PinpointLocalizer) localizer).addTelemetry(telemetry);
+        } else if (telemetry != null) {
+            telemetry.addData("Localizer", localizer.getClass().getSimpleName());
+        }
+    }
+
     public void setDrivePowers(PoseVelocity2d powers) {
         MecanumKinematics.WheelVelocities<Time> wheelVels = new MecanumKinematics(1).inverse(
                 PoseVelocity2dDual.constant(powers, 1));
@@ -341,24 +352,26 @@ public final class MecanumDrive {
             p.put("y", localizer.getPose().position.y);
             p.put("heading (deg)", Math.toDegrees(localizer.getPose().heading.toDouble()));
 
-            Pose2d error = txWorldTarget.value().minusExp(localizer.getPose());
-            p.put("xError", error.position.x);
-            p.put("yError", error.position.y);
-            p.put("headingError (deg)", Math.toDegrees(error.heading.toDouble()));
+            // Live Pinpoint pose/velocity and estimated pose to TelemetryPacket
+            Pose2d estPose = localizer.getPose();
+            p.put("EstX (in)", estPose.position.x);
+            p.put("EstY (in)", estPose.position.y);
+            p.put("EstHeading (deg)", Math.toDegrees(estPose.heading.toDouble()));
 
-            // only draw when active; only one drive action should be active at a time
-            Canvas c = p.fieldOverlay();
-            drawPoseHistory(c);
+            if (localizer instanceof PinpointLocalizer) {
+                PinpointLocalizer pl = (PinpointLocalizer) localizer;
+                GoBildaPinpointDriver driver = pl.driver;
+                if (driver.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY) {
+                    p.put("PinX (in)", driver.getPosX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinY (in)", driver.getPosY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinHeading (deg)", Math.toDegrees(driver.getHeading(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
+                    p.put("PinVelX (in/s)", driver.getVelX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinVelY (in/s)", driver.getVelY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinHeadingVel (deg/s)", Math.toDegrees(driver.getHeadingVelocity(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
+                }
+            }
 
-            c.setStroke("#4CAF50");
-            Drawing.drawRobot(c, txWorldTarget.value());
-
-            c.setStroke("#3F51B5");
-            Drawing.drawRobot(c, localizer.getPose());
-
-            c.setStroke("#4CAF50FF");
-            c.setStrokeWidth(1);
-            c.strokePolyline(xPoints, yPoints);
+            // ...existing code...
 
             return true;
         }
@@ -427,6 +440,29 @@ public final class MecanumDrive {
             leftBack.setPower(feedforward.compute(wheelVels.leftBack) / voltage);
             rightBack.setPower(feedforward.compute(wheelVels.rightBack) / voltage);
             rightFront.setPower(feedforward.compute(wheelVels.rightFront) / voltage);
+
+            // TelemetryPacket: live Pinpoint pose/velocity and estimated pose
+            p.put("x", localizer.getPose().position.x);
+            p.put("y", localizer.getPose().position.y);
+            p.put("heading (deg)", Math.toDegrees(localizer.getPose().heading.toDouble()));
+
+            Pose2d estPoseTurn = localizer.getPose();
+            p.put("EstX (in)", estPoseTurn.position.x);
+            p.put("EstY (in)", estPoseTurn.position.y);
+            p.put("EstHeading (deg)", Math.toDegrees(estPoseTurn.heading.toDouble()));
+
+            if (localizer instanceof PinpointLocalizer) {
+                PinpointLocalizer pl = (PinpointLocalizer) localizer;
+                GoBildaPinpointDriver driver = pl.driver;
+                if (driver.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY) {
+                    p.put("PinX (in)", driver.getPosX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinY (in)", driver.getPosY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinHeading (deg)", Math.toDegrees(driver.getHeading(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
+                    p.put("PinVelX (in/s)", driver.getVelX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinVelY (in/s)", driver.getVelY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                    p.put("PinHeadingVel (deg/s)", Math.toDegrees(driver.getHeadingVelocity(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
+                }
+            }
 
             Canvas c = p.fieldOverlay();
             drawPoseHistory(c);
