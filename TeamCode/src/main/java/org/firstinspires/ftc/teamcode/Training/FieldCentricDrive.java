@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
@@ -22,11 +23,11 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 @TeleOp(group = "Primary", name = "Short Name")
 public class FieldCentricDrive extends LinearOpMode {
-    private DcMotor leftFM;
-    private DcMotor rightFM;
-    private DcMotor leftBM;
-    private DcMotor rightBM;
-    private IMU imu;
+    private DcMotor leftfront_drive;
+    private DcMotor rightfront_drive;
+    private DcMotor leftback_drive;
+    private DcMotor rightback_drive;
+    private IMU pinpoint;
     double lx = gamepad1.left_stick_x;
     double ly = gamepad1.left_stick_y;
     double rx = gamepad1.right_stick_x;
@@ -59,22 +60,22 @@ public class FieldCentricDrive extends LinearOpMode {
     }
 
     public void initDriveMotors() {
-        leftFM = hardwareMap.get(DcMotor.class, "leftFM");
-        rightFM = hardwareMap.get(DcMotor.class, "rightFM");
-        leftBM = hardwareMap.get(DcMotor.class, "leftBM");
-        rightBM = hardwareMap.get(DcMotor.class, "rightBM");
+        leftfront_drive = hardwareMap.get(DcMotor.class, "leftfront_drive");
+        rightfront_drive = hardwareMap.get(DcMotor.class, "rightfront_drive");
+        leftback_drive = hardwareMap.get(DcMotor.class, "leftback_drive");
+        rightback_drive = hardwareMap.get(DcMotor.class, "rightback_drive");
 
         // set oneside to reverse
-        leftFM.setDirection(DcMotor.Direction.REVERSE);
-        leftBM.setDirection(DcMotor.Direction.REVERSE);
+        leftfront_drive.setDirection(DcMotor.Direction.REVERSE);
+        leftback_drive.setDirection(DcMotor.Direction.REVERSE);
 
 
     }
 
     public void initIMU() {
-        imu = hardwareMap.get(IMU.class, "imu");
+        pinpoint = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP));
-        imu.initialize(parameters);
+        pinpoint.initialize(parameters);
 
 
     }
@@ -84,17 +85,17 @@ public class FieldCentricDrive extends LinearOpMode {
         double power = 0.8 + (0.6 * gamepad1.right_trigger);
 
         if (gamepadRateLimit.hasExpired() && gamepad1.a) {
-            imu.resetYaw();
+            pinpoint.resetYaw();
             gamepadRateLimit.reset();
         }
 
-        double heading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double heading = -pinpoint.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double adjustedLx = -ly * Math.sin(heading) + lx * Math.cos(heading);
         double adjustedLy = ly * Math.cos(heading) + lx * Math.sin(heading);
 
-        leftFM.setPower(((adjustedLy + adjustedLx + rx) / max) * power);
-        leftBM.setPower(((adjustedLy - adjustedLx + rx) / max) * power);
-        rightFM.setPower(((adjustedLy - adjustedLx - rx) / max) * power);
-        rightBM.setPower(((adjustedLy + adjustedLx - rx) / max) * power);
+        leftfront_drive.setPower(((adjustedLy + adjustedLx + rx) / max) * power);
+        leftback_drive.setPower(((adjustedLy - adjustedLx + rx) / max) * power);
+        rightfront_drive.setPower(((adjustedLy - adjustedLx - rx) / max) * power);
+        rightback_drive.setPower(((adjustedLy + adjustedLx - rx) / max) * power);
     }
 }

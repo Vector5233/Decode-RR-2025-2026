@@ -14,9 +14,9 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Servo Port 03: crServoFour
  */
 
-
-@TeleOp(group = "Primary", name = "Servo with buttons")
 @Disabled
+@TeleOp(group = "Primary", name = "Servo with buttons")
+
 public class Example_001f_ServoFour extends LinearOpMode {
 
     //global variables go below the class name
