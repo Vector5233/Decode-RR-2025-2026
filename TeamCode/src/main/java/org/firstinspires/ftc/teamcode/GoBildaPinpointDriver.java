@@ -549,6 +549,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
 
     /**
      * Device Status stores any faults the Odometry Computer may be experiencing. These faults include:
+     *
      * @return one of the following states:<br>
      * NOT_READY - The device is currently powering up. And has not initialized yet. RED LED<br>
      * READY - The device is currently functioning as normal. GREEN LED<br>
@@ -559,7 +560,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      * FAULT_BAD_READ - The Java code has detected a bad I²C read, the result reported is a
      * duplicate of the last good read.
      */
-    public DeviceStatus getDeviceStatus(){return lookupStatus(deviceStatus); }
+    public com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.DeviceStatus getDeviceStatus(){return lookupStatus(deviceStatus); }
 
     /**
      * Checks the Odometry Computer's most recent loop time.<br><br>
