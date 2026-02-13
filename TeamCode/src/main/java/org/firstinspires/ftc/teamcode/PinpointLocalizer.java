@@ -5,14 +5,12 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-
-import com.acmerobotics.roadrunner.ftc.FlightRecorder;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -28,13 +26,13 @@ public final class PinpointLocalizer implements Localizer {
 
         // New: pod positions in millimeters (set these to your measured values)
         // X pod (perpendicular) is -190 mm, Y pod (parallel) is -130 mm
-        public double parYmm = -130.0; // Y (parallel) pod position in millimeters
-        public double perpXmm = -190.0; // X (perp) pod position in millimeters
+        public double parYmm = 130.0; // Y (parallel) pod position in millimeters
+        public double perpXmm = 190.0; // X (perp) pod position in millimeters
     }
 
     public static Params PARAMS = new Params();
 
-    public final org.firstinspires.ftc.teamcode.GoBildaPinpointDriver driver;
+    public final GoBildaPinpointDriver driver; // changed type to com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
     public final GoBildaPinpointDriver.EncoderDirection initialParDirection;
     public final GoBildaPinpointDriver.EncoderDirection initialPerpDirection;
 
@@ -47,7 +45,7 @@ public final class PinpointLocalizer implements Localizer {
     public PinpointLocalizer(HardwareMap hardwareMap, double _inPerTick, Pose2d initialPose) {
         // TODO: make sure your config has a Pinpoint device with this name
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        driver = hardwareMap.get(org.firstinspires.ftc.teamcode.GoBildaPinpointDriver.class, "pinpoint");
+        driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
         // store the provided inPerTick for later telemetry
         this.inPerTick = _inPerTick;
