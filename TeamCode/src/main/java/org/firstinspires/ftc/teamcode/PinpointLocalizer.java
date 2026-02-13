@@ -77,7 +77,7 @@ public final class PinpointLocalizer implements Localizer {
         initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
         initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
-        //driver.setEncoderDirections(initialParDirection, initialPerpDirection);
+        driver.setEncoderDirections(initialParDirection, initialPerpDirection);
 
         driver.resetPosAndIMU();
 
