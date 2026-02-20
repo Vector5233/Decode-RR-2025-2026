@@ -20,14 +20,14 @@ public final class PinpointLocalizer implements Localizer {
     public static class Params {
         // legacy tick-based fields retained for compatibility with older code/configs
         @SuppressWarnings("unused")
-        public double parYTicks = 2445.4222625955936; // y position of the parallel encoder (in tick units)
+        public double parYTicks = 0; // y position of the parallel encoder (in tick units)
         @SuppressWarnings("unused")
-        public double perpXTicks =  -989.1761108399662; // x position of the perpendicular encoder (in tick units)
+        public double perpXTicks = 0; // x position of the perpendicular encoder (in tick units)
 
         // New: pod positions in millimeters (set these to your measured values)
         // X pod (perpendicular) is -190 mm, Y pod (parallel) is -130 mm
-        public double parYmm = 130.0; // Y (parallel) pod position in millimeters
-        public double perpXmm = 190.0; // X (perp) pod position in millimeters
+        public double parYmm = -130.0; // Y (parallel) pod position in millimeters
+        public double perpXmm = -160.0; // X (perp) pod position in millimeters
     }
 
     public static Params PARAMS = new Params();
