@@ -6,12 +6,13 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+
 import java.util.Locale;
 import java.util.Objects;
 
@@ -20,14 +21,14 @@ public final class PinpointLocalizer implements Localizer {
     public static class Params {
         // legacy tick-based fields retained for compatibility with older code/configs
         @SuppressWarnings("unused")
-        public double parYTicks = 0; // y position of the parallel encoder (in tick units)
+        public double parYTicks = 2487.6439739760563; // y position of the parallel encoder (in tick units)
         @SuppressWarnings("unused")
-        public double perpXTicks = 0; // x position of the perpendicular encoder (in tick units)
+        public double perpXTicks = -943.7975723527676; // x position of the perpendicular encoder (in tick units)
 
         // New: pod positions in millimeters (set these to your measured values)
         // X pod (perpendicular) is -190 mm, Y pod (parallel) is -130 mm
         public double parYmm = -130.0; // Y (parallel) pod position in millimeters
-        public double perpXmm = -160.0; // X (perp) pod position in millimeters
+        public double perpXmm = -190.0; // X (perp) pod position in millimeters
     }
 
     public static Params PARAMS = new Params();

@@ -40,6 +40,7 @@ import com.acmerobotics.roadrunner.ftc.LynxFirmware;
 import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -56,10 +57,10 @@ import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 @Config
 public final class MecanumDrive {
     public static class Params {
@@ -72,13 +73,13 @@ public final class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
         // drive model parameters
-        public double inPerTick = 1.0;
-        public double lateralInPerTick = 0;
-        public double trackWidthTicks = 0;
+        public double inPerTick = 1.0; //0.002873 after forward push test.
+        public double lateralInPerTick = 0.8198179582986849;
+        public double trackWidthTicks = 526.7926203178429;
 
         // feedforward parameters (in tick units)
-        public double kS = 0;
-        public double kV = 0;
+        public double kS = 1.4472125370201292;
+        public double kV = 0.0005321674957002409;//0.09852
         public double kA = 0;
 
         // path profile parameters (in inches)
@@ -98,6 +99,8 @@ public final class MecanumDrive {
         public double axialVelGain = 0.1;
         public double lateralVelGain = 0.9;
         public double headingVelGain = 0.5; // shared with turn
+        public double parYticks = 2487.6439739760563;
+        public double parXticks =  -943.7975723527676;
     }
 
     public static Params PARAMS = new Params();
@@ -500,6 +503,7 @@ public final class MecanumDrive {
 
     public PoseVelocity2d updatePoseEstimate() {
         PoseVelocity2d vel = localizer.update();
+        //Pose2d pose = localizer.getPoseEstimate();
         poseHistory.add(localizer.getPose());
 
         while (poseHistory.size() > 100) {

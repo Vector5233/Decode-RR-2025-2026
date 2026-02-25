@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp (group = "DriverControl", name = "Teleop")
+@TeleOp (group = "DriverControl", name = "TeleopAdvancedV1")
 public class TELEOPV1 extends LinearOpMode {
 
     private DcMotorEx flywheelMotor;
