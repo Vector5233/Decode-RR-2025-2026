@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ public final class PinpointLocalizer implements Localizer {
 
     public static Params PARAMS = new Params();
 
-    public final GoBildaPinpointDriver driver; // changed type to com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
+    public final com.qualcomm.hardware.gobilda.GoBildaPinpointDriver driver; // changed type to com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
     public final GoBildaPinpointDriver.EncoderDirection initialParDirection;
     public final GoBildaPinpointDriver.EncoderDirection initialPerpDirection;
 
@@ -45,7 +45,7 @@ public final class PinpointLocalizer implements Localizer {
     public PinpointLocalizer(HardwareMap hardwareMap, double _inPerTick, Pose2d initialPose) {
         // TODO: make sure your config has a Pinpoint device with this name
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        driver = hardwareMap.get(com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.class, "pinpoint");
 
         // store the provided inPerTick for later telemetry
         this.inPerTick = _inPerTick;
@@ -127,7 +127,7 @@ public final class PinpointLocalizer implements Localizer {
         telemetry.addData("Inches per tick", this.inPerTick);
 
         // If the device is ready, show live Pinpoint-reported pose & velocities and the estimated pose
-        GoBildaPinpointDriver.DeviceStatus status = driver.getDeviceStatus();
+        com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.DeviceStatus status = driver.getDeviceStatus();
         if (status == GoBildaPinpointDriver.DeviceStatus.READY) {
             // Pinpoint device pose (inches)
             double pinX = driver.getPosX(DistanceUnit.INCH);
