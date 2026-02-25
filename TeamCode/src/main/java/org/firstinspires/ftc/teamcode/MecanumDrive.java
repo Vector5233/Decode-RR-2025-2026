@@ -56,11 +56,10 @@ import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 @Config
 public final class MecanumDrive {
     public static class Params {
@@ -261,6 +260,9 @@ public final class MecanumDrive {
         localizer = new PinpointLocalizer(hardwareMap,PARAMS.inPerTick,pose);
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
+        if (localizer instanceof PinpointLocalizer) {
+            ((PinpointLocalizer) localizer).driver.setHeading(0,AngleUnit.RADIANS);
+        }
     }
 
     // Public helper: forward an OpMode Telemetry object to the localizer if supported
@@ -541,5 +543,25 @@ public final class MecanumDrive {
                 defaultTurnConstraints,
                 defaultVelConstraint, defaultAccelConstraint
         );
+    }
+    // ----------------------------
+    // IMU Reset Helper
+    // ----------------------------
+    public void resetIMU() {
+        // If using GoBilda Pinpoint
+        if (localizer instanceof PinpointLocalizer) {
+            PinpointLocalizer pl = (PinpointLocalizer) localizer;
+            pl.driver.setHeading(0, AngleUnit.RADIANS);  // re-zero heading
+        }
+
+        // If using standard REV IMU
+        if (lazyImu != null) {
+            IMU imu = lazyImu.get();
+            try {
+                imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
+                        PARAMS.logoFacingDirection, PARAMS.usbFacingDirection
+                )));
+            } catch (Exception ignored) {}
+        }
     }
 }
