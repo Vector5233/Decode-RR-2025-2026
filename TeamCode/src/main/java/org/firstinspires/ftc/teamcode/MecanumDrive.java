@@ -48,7 +48,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -64,6 +63,7 @@ import java.util.LinkedList;
 import java.util.List;
 @Config
 public final class MecanumDrive {
+    final double inPerTick;
     public static class Params {
         // IMU orientation
         // TODO: fill in these values based on
@@ -80,8 +80,8 @@ public final class MecanumDrive {
 
         // feedforward parameters (in tick units)
         public double kS = 1.4472125370201292;
-        public double kV = 0.0005321674957002409;//0.09852
-        public double kA = 0;
+        public double kV = 0.005321674957002409;//0.09852
+        public double kA = 0.085;
 
         // path profile parameters (in inches)
         public double maxWheelVel = 50;
@@ -227,8 +227,15 @@ public final class MecanumDrive {
             return twist.velocity().value();
         }
     }
+    public class DriveConstants {
+        public static final double TICKS_PER_REV = 537.7;
+        public static final double WHEEL_DIAMETER = 96.0 / 25.4; // in
+        public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
 
+        public static final double IN_PER_TICK = WHEEL_CIRCUMFERENCE / TICKS_PER_REV;
+    }
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
+        this.inPerTick = DriveConstants.IN_PER_TICK;
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
@@ -250,12 +257,13 @@ public final class MecanumDrive {
         // TODO: reverse motor directions if needed
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", (ImuOrientationOnRobot) new IMU.Parameters(new RevHubOrientationOnRobot(
-                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection)));
+        lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
+                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 //        lazyImu = new LazyHardwareMapImu(hardwareMap, "pinpoint", new RevHubOrientationOnRobot(
 //                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 

@@ -27,8 +27,8 @@ public final class PinpointLocalizer implements Localizer {
 
         // New: pod positions in millimeters (set these to your measured values)
         // X pod (perpendicular) is -190 mm, Y pod (parallel) is -130 mm
-        public double parYmm = -130.0; // Y (parallel) pod position in millimeters
-        public double perpXmm = -190.0; // X (perp) pod position in millimeters
+        public double parYmm = -220.0; // Y (parallel) pod position in millimeters
+        public double perpXmm = -130; // X (perp) pod position in millimeters
     }
 
     public static Params PARAMS = new Params();
@@ -75,8 +75,8 @@ public final class PinpointLocalizer implements Localizer {
         driver.setOffsets(perpXInches, parYInches, DistanceUnit.INCH);
 
         // TODO: reverse encoder directions if needed
-        initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
-        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
+        initialParDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
 
         driver.setEncoderDirections(initialParDirection, initialPerpDirection);// This
 
