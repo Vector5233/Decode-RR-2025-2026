@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.OTOSLocalizer;
 import org.firstinspires.ftc.teamcode.PinpointLocalizer;
@@ -69,8 +70,8 @@ public final class TuningOpModes {
 
     private static PinpointView makePinpointView(PinpointLocalizer pl) {
         return new PinpointView() {
-            com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection parDirection = pl.initialParDirection;
-            com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection perpDirection = pl.initialPerpDirection;
+            GoBildaPinpointDriver.EncoderDirection parDirection = pl.initialParDirection;
+            GoBildaPinpointDriver.EncoderDirection perpDirection = pl.initialPerpDirection;
 
             @Override
             public void update() {
@@ -95,28 +96,28 @@ public final class TuningOpModes {
             @Override
             public void setParDirection(@NonNull DcMotorSimple.Direction direction) {
                 parDirection = direction == DcMotorSimple.Direction.FORWARD ?
-                        com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection.FORWARD :
-                        com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection.REVERSED;
+                        GoBildaPinpointDriver.EncoderDirection.FORWARD :
+                        GoBildaPinpointDriver.EncoderDirection.REVERSED;
                 pl.driver.setEncoderDirections(parDirection, perpDirection);
             }
 
             @Override
             public DcMotorSimple.Direction getParDirection() {
-                return parDirection == com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection.FORWARD ?
+                return parDirection == GoBildaPinpointDriver.EncoderDirection.FORWARD ?
                         DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
             }
 
             @Override
             public void setPerpDirection(@NonNull DcMotorSimple.Direction direction) {
                 perpDirection = direction == DcMotorSimple.Direction.FORWARD ?
-                        com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection.FORWARD :
-                        com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection.REVERSED;
+                        GoBildaPinpointDriver.EncoderDirection.FORWARD :
+                        GoBildaPinpointDriver.EncoderDirection.REVERSED;
                 pl.driver.setEncoderDirections(parDirection, perpDirection);
             }
 
             @Override
             public DcMotorSimple.Direction getPerpDirection() {
-                return perpDirection == com.qualcomm.hardware.gobilda.GoBildaPinpointDriver.EncoderDirection.FORWARD ?
+                return perpDirection == GoBildaPinpointDriver.EncoderDirection.FORWARD ?
                         DcMotorSimple.Direction.FORWARD : DcMotorSimple.Direction.REVERSE;
             }
         };

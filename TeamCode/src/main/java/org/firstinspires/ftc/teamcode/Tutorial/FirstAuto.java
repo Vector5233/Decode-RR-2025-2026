@@ -26,7 +26,7 @@ public class FirstAuto extends LinearOpMode {
         waitForStart();
 
         Action path = drive.actionBuilder(beginPose)
-                .splineToSplineHeading(new Pose2d(40,0,Math.toRadians(180)), Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(40,40,Math.toRadians(180)), Math.toRadians(270))
                 .splineToConstantHeading(new Vector2d(40,-48), Math.toRadians(0))
                 .lineToXConstantHeading(0)
                 .build();
