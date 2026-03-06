@@ -40,17 +40,14 @@ import com.acmerobotics.roadrunner.ftc.LynxFirmware;
 import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
@@ -61,27 +58,27 @@ import org.firstinspires.ftc.teamcode.messages.PoseMessage;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
 @Config
 public final class MecanumDrive {
-    final double inPerTick;
     public static class Params {
         // IMU orientation
         // TODO: fill in these values based on
         //   see https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html?highlight=imu#physical-hub-mounting
         public RevHubOrientationOnRobot.LogoFacingDirection logoFacingDirection =
-                RevHubOrientationOnRobot.LogoFacingDirection.FORWARD;
+                RevHubOrientationOnRobot.LogoFacingDirection.UP;
         public RevHubOrientationOnRobot.UsbFacingDirection usbFacingDirection =
-                RevHubOrientationOnRobot.UsbFacingDirection.UP;
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
         // drive model parameters
-        public double inPerTick = 1.0; //0.002873 after forward push test.
-        public double lateralInPerTick = 0.8198179582986849;
-        public double trackWidthTicks = 526.7926203178429;
+        public double inPerTick = 0.00059958260;
+        public double lateralInPerTick = inPerTick;
+        public double trackWidthTicks = 0;
 
         // feedforward parameters (in tick units)
         public double kS = 1.4472125370201292;
-        public double kV = 0.005321674957002409;//0.09852
-        public double kA = 0.085;
+        public double kV = 0.0005321674957002409;
+        public double kA =  0.085;
 
         // path profile parameters (in inches)
         public double maxWheelVel = 50;
@@ -93,13 +90,13 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = .009;
-        public double lateralGain = 5;
-        public double headingGain = 20; // shared with turn
+        public double axialGain = 0.0;
+        public double lateralGain = 0.0;
+        public double headingGain = 0.0; // shared with turn
 
-        public double axialVelGain = 0.1;
-        public double lateralVelGain = 0.9;
-        public double headingVelGain = 0.5; // shared with turn
+        public double axialVelGain = 0.0;
+        public double lateralVelGain = 0.0;
+        public double headingVelGain = 0.0; // shared with turn
     }
 
     public static Params PARAMS = new Params();
@@ -149,8 +146,7 @@ public final class MecanumDrive {
             imu = lazyImu.get();
 
             // TODO: reverse encoders if needed
-              leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-            leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+            //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
             this.pose = pose;
         }
@@ -227,15 +223,8 @@ public final class MecanumDrive {
             return twist.velocity().value();
         }
     }
-    public class DriveConstants {
-        public static final double TICKS_PER_REV = 537.7;
-        public static final double WHEEL_DIAMETER = 96.0 / 25.4; // in
-        public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
 
-        public static final double IN_PER_TICK = WHEEL_CIRCUMFERENCE / TICKS_PER_REV;
-    }
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
-        this.inPerTick = DriveConstants.IN_PER_TICK;
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
@@ -255,36 +244,22 @@ public final class MecanumDrive {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // TODO: reverse motor directions if needed
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftBack.setDirection(DcMotor.Direction.REVERSE);
+
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightBack.setDirection(DcMotor.Direction.FORWARD);
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
         lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
                 PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
-//        lazyImu = new LazyHardwareMapImu(hardwareMap, "pinpoint", new RevHubOrientationOnRobot(
-//                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        localizer = new PinpointLocalizer(hardwareMap,PARAMS.inPerTick,pose);
+        localizer = new DriveLocalizer(pose);
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
-        if (localizer instanceof PinpointLocalizer) {
-            ((PinpointLocalizer) localizer).driver.setHeading(0,AngleUnit.RADIANS);
-        }
-    }
-
-    // Public helper: forward an OpMode Telemetry object to the localizer if supported
-    @SuppressWarnings("unused")
-    public void addLocalizerTelemetry(Telemetry telemetry) {
-        if (localizer instanceof PinpointLocalizer) {
-            ((PinpointLocalizer) localizer).addTelemetry(telemetry);
-        } else if (telemetry != null) {
-            telemetry.addData("Localizer", localizer.getClass().getSimpleName());
-        }
     }
 
     public void setDrivePowers(PoseVelocity2d powers) {
@@ -376,26 +351,24 @@ public final class MecanumDrive {
             p.put("y", localizer.getPose().position.y);
             p.put("heading (deg)", Math.toDegrees(localizer.getPose().heading.toDouble()));
 
-            // Live Pinpoint pose/velocity and estimated pose to TelemetryPacket
-            Pose2d estPose = localizer.getPose();
-            p.put("EstX (in)", estPose.position.x);
-            p.put("EstY (in)", estPose.position.y);
-            p.put("EstHeading (deg)", Math.toDegrees(estPose.heading.toDouble()));
+            Pose2d error = txWorldTarget.value().minusExp(localizer.getPose());
+            p.put("xError", error.position.x);
+            p.put("yError", error.position.y);
+            p.put("headingError (deg)", Math.toDegrees(error.heading.toDouble()));
 
-            if (localizer instanceof PinpointLocalizer) {
-                PinpointLocalizer pl = (PinpointLocalizer) localizer;
-                GoBildaPinpointDriver driver = pl.driver;
-                if (driver.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY) {
-                    p.put("PinX (in)", driver.getPosX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinY (in)", driver.getPosY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinHeading (deg)", Math.toDegrees(driver.getHeading(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
-                    p.put("PinVelX (in/s)", driver.getVelX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinVelY (in/s)", driver.getVelY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinHeadingVel (deg/s)", Math.toDegrees(driver.getHeadingVelocity(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
-                }
-            }
+            // only draw when active; only one drive action should be active at a time
+            Canvas c = p.fieldOverlay();
+            drawPoseHistory(c);
 
-            // ...existing code...
+            c.setStroke("#4CAF50");
+            Drawing.drawRobot(c, txWorldTarget.value());
+
+            c.setStroke("#3F51B5");
+            Drawing.drawRobot(c, localizer.getPose());
+
+            c.setStroke("#4CAF50FF");
+            c.setStrokeWidth(1);
+            c.strokePolyline(xPoints, yPoints);
 
             return true;
         }
@@ -465,29 +438,6 @@ public final class MecanumDrive {
             rightBack.setPower(feedforward.compute(wheelVels.rightBack) / voltage);
             rightFront.setPower(feedforward.compute(wheelVels.rightFront) / voltage);
 
-            // TelemetryPacket: live Pinpoint pose/velocity and estimated pose
-            p.put("x", localizer.getPose().position.x);
-            p.put("y", localizer.getPose().position.y);
-            p.put("heading (deg)", Math.toDegrees(localizer.getPose().heading.toDouble()));
-
-            Pose2d estPoseTurn = localizer.getPose();
-            p.put("EstX (in)", estPoseTurn.position.x);
-            p.put("EstY (in)", estPoseTurn.position.y);
-            p.put("EstHeading (deg)", Math.toDegrees(estPoseTurn.heading.toDouble()));
-
-            if (localizer instanceof PinpointLocalizer) {
-                PinpointLocalizer pl = (PinpointLocalizer) localizer;
-                GoBildaPinpointDriver driver = pl.driver;
-                if (driver.getDeviceStatus() == GoBildaPinpointDriver.DeviceStatus.READY) {
-                    p.put("PinX (in)", driver.getPosX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinY (in)", driver.getPosY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinHeading (deg)", Math.toDegrees(driver.getHeading(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
-                    p.put("PinVelX (in/s)", driver.getVelX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinVelY (in/s)", driver.getVelY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
-                    p.put("PinHeadingVel (deg/s)", Math.toDegrees(driver.getHeadingVelocity(org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit.RADIANS)));
-                }
-            }
-
             Canvas c = p.fieldOverlay();
             drawPoseHistory(c);
 
@@ -512,16 +462,15 @@ public final class MecanumDrive {
 
     public PoseVelocity2d updatePoseEstimate() {
         PoseVelocity2d vel = localizer.update();
-        //Pose2d pose = localizer.getPoseEstimate();
         poseHistory.add(localizer.getPose());
-
+        
         while (poseHistory.size() > 100) {
             poseHistory.removeFirst();
         }
 
         estimatedPoseWriter.write(new PoseMessage(localizer.getPose()));
-
-
+        
+        
         return vel;
     }
 
@@ -556,25 +505,5 @@ public final class MecanumDrive {
                 defaultTurnConstraints,
                 defaultVelConstraint, defaultAccelConstraint
         );
-    }
-    // ----------------------------
-    // IMU Reset Helper
-    // ----------------------------
-    public void resetIMU() {
-        // If using GoBilda Pinpoint
-        if (localizer instanceof PinpointLocalizer) {
-            PinpointLocalizer pl = (PinpointLocalizer) localizer;
-            pl.driver.setHeading(0, AngleUnit.RADIANS);  // re-zero heading
-        }
-
-        // If using standard REV IMU
-        if (lazyImu != null) {
-            IMU imu = lazyImu.get();
-            try {
-                imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
-                        PARAMS.logoFacingDirection, PARAMS.usbFacingDirection
-                )));
-            } catch (Exception ignored) {}
-        }
     }
 }
