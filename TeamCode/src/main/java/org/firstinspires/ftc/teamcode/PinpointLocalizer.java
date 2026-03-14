@@ -21,9 +21,9 @@ public final class PinpointLocalizer implements Localizer {
     public static class Params {
         // legacy tick-based fields retained for compatibility with older code/configs
         @SuppressWarnings("unused")
-        public double parYTicks = 2487.6439739760563; // y position of the parallel encoder (in tick units)
+        public double parYTicks = 2483.274156718198; // y position of the parallel encoder (in tick units)
         @SuppressWarnings("unused")
-        public double perpXTicks = -943.7975723527676; // x position of the perpendicular encoder (in tick units)
+        public double perpXTicks = -963.9081091951897; // x position of the perpendicular encoder (in tick units)
 
         // New: pod positions in millimeters (set these to your measured values)
         // X pod (perpendicular) is -190 mm, Y pod (parallel) is -130 mm
@@ -52,7 +52,10 @@ public final class PinpointLocalizer implements Localizer {
         this.inPerTick = _inPerTick;
 
         // use the inPerTick passed into the constructor
-        driver.setEncoderResolution(1.0 / this.inPerTick, DistanceUnit.INCH);
+        //driver.setEncoderResolution(1.0 / this.inPerTick, DistanceUnit.INCH);
+        // Replace the SWINGARM_POD constant with a direct Inch-based resolution
+        //driver.setEncoderResolution(1.0, DistanceUnit.INCH);
+        driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
         // TODO: add in the correct offset values here for the pods to the computer
         //The Pinpoint computer needs to know where your tracking wheels are
         // relative to the center of rotation of your robot
@@ -75,8 +78,8 @@ public final class PinpointLocalizer implements Localizer {
         driver.setOffsets(perpXInches, parYInches, DistanceUnit.INCH);
 
         // TODO: reverse encoder directions if needed
-        initialParDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
-        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
+        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
         driver.setEncoderDirections(initialParDirection, initialPerpDirection);// This
 
