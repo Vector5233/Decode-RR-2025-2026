@@ -54,8 +54,8 @@ public final class PinpointLocalizer implements Localizer {
         // use the inPerTick passed into the constructor
         //driver.setEncoderResolution(1.0 / this.inPerTick, DistanceUnit.INCH);
         // Replace the SWINGARM_POD constant with a direct Inch-based resolution
-        //driver.setEncoderResolution(1.0, DistanceUnit.INCH);
-        driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        driver.setEncoderResolution(1.0/_inPerTick, DistanceUnit.INCH);
+        //driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
         // TODO: add in the correct offset values here for the pods to the computer
         //The Pinpoint computer needs to know where your tracking wheels are
         // relative to the center of rotation of your robot
