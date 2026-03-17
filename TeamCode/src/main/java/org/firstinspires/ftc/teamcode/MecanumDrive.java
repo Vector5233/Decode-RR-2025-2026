@@ -76,7 +76,7 @@ public final class MecanumDrive {
         // drive model parameters
         public double inPerTick = 0.0029676;
         public double lateralInPerTick = 1.0;
-        public double trackWidthTicks = 14.0;
+        public double trackWidthTicks =4717; //4717.616929505324; 14.0;
 
         // feedforward parameters (in tick units)
         public double kS = 1.20;
@@ -93,7 +93,7 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = .009;
+        public double axialGain = 5; //.009;
         public double lateralGain = 5;
         public double headingGain = 20; // shared with turn
 
@@ -103,10 +103,10 @@ public final class MecanumDrive {
     }
 
     public static Params PARAMS = new Params();
+  //  public final MecanumKinematics kinematics = new MecanumKinematics(
+     //       PARAMS.trackWidthTicks, 1.0 / PARAMS.lateralInPerTick);
     public final MecanumKinematics kinematics = new MecanumKinematics(
-            PARAMS.trackWidthTicks, 1.0 / PARAMS.lateralInPerTick);
-    //public final MecanumKinematics kinematics = new MecanumKinematics(
-      //      PARAMS.inPerTick * PARAMS.trackWidthTicks, PARAMS.inPerTick / PARAMS.lateralInPerTick);
+           PARAMS.inPerTick * PARAMS.trackWidthTicks, PARAMS.inPerTick / PARAMS.lateralInPerTick);
 
     public final TurnConstraints defaultTurnConstraints = new TurnConstraints(
             PARAMS.maxAngVel, -PARAMS.maxAngAccel, PARAMS.maxAngAccel);
@@ -264,7 +264,7 @@ public final class MecanumDrive {
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-       lazyImu = new LazyHardwareMapImu(hardwareMap, "pinpoint", new RevHubOrientationOnRobot(
+       lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
                 PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
@@ -356,7 +356,8 @@ public final class MecanumDrive {
             MecanumKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
             double voltage = voltageSensor.getVoltage();
 
-            final MotorFeedforward feedforward = new MotorFeedforward(PARAMS.kS, PARAMS.kV, PARAMS.kA);
+            final MotorFeedforward feedforward =new MotorFeedforward(PARAMS.kS, PARAMS.kV / PARAMS.inPerTick, PARAMS.kA / PARAMS.inPerTick);
+            //new MotorFeedforward(PARAMS.kS, PARAMS.kV, PARAMS.kA);
             double leftFrontPower = feedforward.compute(wheelVels.leftFront) / voltage;
             double leftBackPower = feedforward.compute(wheelVels.leftBack) / voltage;
             double rightBackPower = feedforward.compute(wheelVels.rightBack) / voltage;
