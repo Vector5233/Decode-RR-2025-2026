@@ -5,45 +5,65 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @TeleOp(name="Pinpoint 24 Inch Test", group="Calibration")
 public class Pinpoint24InchTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // Initialize Pose
         Pose2d beginPose = new Pose2d(0, 0, 0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
 
-        waitForStart();
+        // DIAGNOSTIC LOOP - check Pinpoint before running
+        while (!isStarted() && !isStopRequested()) {
+            drive.updatePoseEstimate();
+            Pose2d p = drive.localizer.getPose();
+
+            if (drive.localizer instanceof PinpointLocalizer) {
+                PinpointLocalizer pl = (PinpointLocalizer) drive.localizer;
+                telemetry.addData("Pinpoint Status", pl.driver.getDeviceStatus());
+                telemetry.addData("PinX (in)", pl.driver.getPosX(
+                        org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                telemetry.addData("PinY (in)", pl.driver.getPosY(
+                        org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+                telemetry.addData("Raw Par Ticks", pl.driver.getEncoderX());
+                telemetry.addData("Raw Perp Ticks", pl.driver.getEncoderY());
+                telemetry.addData("PinX (in)", pl.driver.getPosX(DistanceUnit.INCH));
+            }
+
+            telemetry.addData("Est X", p.position.x);
+            telemetry.addData("Est Y", p.position.y);
+
+            telemetry.update();
+        }
 
         if (isStopRequested()) return;
 
-        // 1. Reset the localizer and the drive pose to 0,0,0
         drive.localizer.setPose(new Pose2d(0, 0, 0));
 
-        // 2. Execute the move (Forward 24 inches)
-        // Actions.runBlocking waits for the movement to finish before continuing
+        // Move slowly to reduce overshoot while diagnosing
         Actions.runBlocking(
                 drive.actionBuilder(new Pose2d(0, 0, 0))
                         .lineToX(24)
                         .build()
         );
 
-        // 3. TELEMETRY LOOP
-        // After the robot stops, this loop keeps running so you can look
-        // at the phone and see where the robot *thinks* it ended up.
         while (opModeIsActive()) {
             drive.updatePoseEstimate();
-
-            // In RR 1.0, we access position via .position and heading via .heading
             Pose2d p = drive.localizer.getPose();
-            //Pose2d p = drive.updatePoseEstimate().value();
+
+            if (drive.localizer instanceof PinpointLocalizer) {
+                PinpointLocalizer pl = (PinpointLocalizer) drive.localizer;
+                telemetry.addData("Pinpoint Status", pl.driver.getDeviceStatus());
+            }
+
             telemetry.addLine("--- TEST COMPLETE ---");
             telemetry.addData("Target X", 24.0);
-            telemetry.addData("Actual X (RR Estimate)", p.position.x);
-            telemetry.addData("Actual Y (RR Estimate)", p.position.y);
+            telemetry.addData("Actual X", p.position.x);
+            telemetry.addData("Actual Y", p.position.y);
             telemetry.addData("Heading (deg)", Math.toDegrees(p.heading.toDouble()));
-            telemetry.addLine("\nIf 'Actual X' is NOT 24, adjust inPerTick in MecanumDrive.");
+
             telemetry.update();
         }
     }

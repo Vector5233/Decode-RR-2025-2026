@@ -54,8 +54,14 @@ public final class PinpointLocalizer implements Localizer {
         // use the inPerTick passed into the constructor
         //driver.setEncoderResolution(1.0 / this.inPerTick, DistanceUnit.INCH);
         // Replace the SWINGARM_POD constant with a direct Inch-based resolution
-        driver.setEncoderResolution(1.0/_inPerTick, DistanceUnit.INCH);
-        //driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        driver.setEncoderResolution(0.0011305142857143/_inPerTick, DistanceUnit.INCH);
+//        driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+//        // 35mm wheel diameter, 2000 ticks per revolution
+//        double wheelDiameterMM = 35.0;
+//        double ticksPerRev = 2000.0;
+//        double mmPerTick = (Math.PI * wheelDiameterMM) / ticksPerRev;
+//        driver.setEncoderResolution(mmPerTick, DistanceUnit.MM);
+
         // TODO: add in the correct offset values here for the pods to the computer
         //The Pinpoint computer needs to know where your tracking wheels are
         // relative to the center of rotation of your robot
@@ -78,7 +84,7 @@ public final class PinpointLocalizer implements Localizer {
         driver.setOffsets(perpXInches, parYInches, DistanceUnit.INCH);
 
         // TODO: reverse encoder directions if needed
-        initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
+        initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED; // Set this to REVERSED if your parallel encoder counts backwards (positive ticks when moving backwards)
         initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
         driver.setEncoderDirections(initialParDirection, initialPerpDirection);// This
@@ -158,6 +164,9 @@ public final class PinpointLocalizer implements Localizer {
             telemetry.addData("EstX (in)", String.format(Locale.US, "%.3f", est.position.x));
             telemetry.addData("EstY (in)", String.format(Locale.US, "%.3f", est.position.y));
             telemetry.addData("EstHeading (deg)", String.format(Locale.US, "%.2f", Math.toDegrees(est.heading.toDouble())));
+
+
+
         }
     }
 }
