@@ -56,6 +56,11 @@ public class Pinpoint24InchTest extends LinearOpMode {
             if (drive.localizer instanceof PinpointLocalizer) {
                 PinpointLocalizer pl = (PinpointLocalizer) drive.localizer;
                 telemetry.addData("Pinpoint Status", pl.driver.getDeviceStatus());
+
+                // Inside the while(opModeIsActive()) loop after the move:
+                telemetry.addData("Fault Status", pl.driver.getDeviceStatus());
+                telemetry.addData("Raw Par Ticks", pl.driver.getEncoderX());
+                telemetry.addData("Raw Perp Ticks", pl.driver.getEncoderY());
             }
 
             telemetry.addLine("--- TEST COMPLETE ---");
